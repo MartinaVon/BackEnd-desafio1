@@ -1,44 +1,124 @@
+
+const fs = require("fs")
+
+const path = "./allProducts.json"
+
 class productManager {
-    constructor(){
-        this.products = []
+    constructor(path){
+        this.path = path
     } 
-    addProduct(title, description, price, thumbnail, code, stock) {
-        const newProduct = {
-            title,
-            description,
-            price,
-            thumbnail,
-            code,
-            stock
+
+    addProduct = async(title, description, price, thumbnail, code, stock) => {
+        try {
+            const allProducts = await this.getProducts()
+
+            const newProduct = {
+                title,
+                description,
+                price,
+                thumbnail,
+                code,
+                stock
+            }
+
+            const newProductCode = newProduct.code
+            const codeFilter = allProducts.some(product => product.code === newProductCode)
+
+            if (!codeFilter 
+                && newProduct.title 
+                && newProduct.description 
+                && newProduct.price 
+                && newProduct.thumbnail 
+                && newProduct.code 
+                && newProduct.stock) {
+                if (allProducts.length === 0) {
+                    newProduct.id = 1
+                } else {
+                    ///////accedo al id del ultimo elemento del array y lo incremento en uno.
+                    newProduct.id = allProducts[allProducts.length - 1].id + 1
+                } 
+                allProducts.push(newProduct)
+                await fs.promises.writeFile(this.path, JSON.stringify(allProducts, null, '\t'));
+           }
+        } catch (error) {
+            console.log(error);
         }
-        const newProductCode = newProduct.code
+    }
 
-        const codeFilter = this.products.some(product => product.code === newProductCode)
-        console.log(codeFilter)
-
-        if (!codeFilter && newProduct.title && newProduct.description && newProduct.price && newProduct.thumbnail && newProduct.code && newProduct.stock) {
-            
-            if (this.products.length === 0) {
-                newProduct.id = 1
+    getProducts = async () => {
+        try {
+            if (fs.existsSync(this.path)) {
+                const data = await fs.promises.readFile(this.path, 'utf-8');
+                const allProducts = await JSON.parse(data);
+                return allProducts;
             } else {
-                ///////accedo al id del ultimo elemento del array y lo incremento en uno.
-                newProduct.id = this.products[this.products.length - 1].id + 1
-            } 
-            this.products.push(newProduct)
-       }
+                return [];
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
-     getProducts() {
-        return this.products
-    }
-     getProductById(idProducto) {
-        const idFilter = this.products.find(product => idProducto === product.id)
+    
+    getProductById = async(idProducto) => {
+        try {
+            if (fs.existsSync(this.path)) {
+                const data = await fs.promises.readFile(this.path, 'utf-8');
+                const allProducts = await JSON.parse(data);
 
-        !idFilter && console.log("product not found") 
-        return
-     }
+                const idFilter = allProducts.find(product => idProducto === product.id)
+                !idFilter && console.log("product not found") 
+                return
+            } 
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    updateProduct = async(id, field) => {
+        try {
+            if (fs.existsSync(this.path)) {
+                const data = await fs.promises.readFile(this.path, "utf-8")
+                const allProducts = await JSON.parse(data)
+
+                const productIndex = allProducts.findIndex(item => item.id = id)
+                if (productIndex === -1) {
+                    console.log("El producto no existe")
+                    return;
+                }
+
+                allProducts[productIndex].field = "no se que poner aca"
+
+                await fs.promises.writeFile(this.path, JSON.stringify(allProducts, null, '\t'))
+            }
+        } catch(error) {
+            console.log(error)
+        }
+    }
+
+    deleteProduct = async(id) => {
+        try {
+            if (fs.existsSync(this.path)) {
+                const data = await fs.promises.readFile(this.path, "utf-8")
+                const allProducts = await JSON.parse(data)
+
+                const productIndex = allProducts.findIndex(item => item.id = id)
+
+                if (productIndex === -1) {
+                    console.log("El producto no existe")
+                    return;
+                } else {
+                    allProducts.splice(productIndex, 1)
+                }
+
+                await fs.promises.writeFile(this.path, JSON.stringify(allProducts, null, '\t'))
+            }
+        }  catch(error) {
+            console.log(error)
+        }
+    }
 }
 
-const handleProducts = new productManager()
+const handleProducts = new productManager(path)
 
 
 handleProducts.addProduct("remera", "verde", 200, "url", "0025", "7")
@@ -51,4 +131,3 @@ handleProducts.getProductById(8)
 console.log(handleProducts.getProducts())
 
 
- 
