@@ -1,9 +1,7 @@
 
-const fs = require("fs")
+import fs from "fs"
 
-const path = "./allProducts.json"
-
-class productManager {
+export default class productManager {
     constructor(path){
         this.path = path
     } 
@@ -47,17 +45,18 @@ class productManager {
 
     getProducts = async () => {
         try {
-            if (fs.existsSync(this.path)) {
-                const data = await fs.promises.readFile(this.path, 'utf-8');
-                const allProducts = await JSON.parse(data);
-                return allProducts;
-            } else {
-                return [];
-            }
+          if (fs.existsSync(this.path)) {
+            const data = await fs.promises.readFile(this.path, 'utf-8');
+            const allProducts = JSON.parse(data);
+            return allProducts;
+          } else {
+            return "caca";
+          }
         } catch (error) {
-            console.log(error);
+          console.log(error);
+          return [];
         }
-    }
+      }
     
     getProductById = async(idProducto) => {
         try {
@@ -117,9 +116,8 @@ class productManager {
         }
     }
 }
-
+/*
 const handleProducts = new productManager(path)
-
 
 handleProducts.addProduct("remera", "verde", 200, "url", "0025", "7")
 handleProducts.addProduct("pantalon", "verde", "url", "0084", "7")
@@ -129,5 +127,6 @@ handleProducts.addProduct("remeron", "verde", 200, "url", "0032", "7")
 handleProducts.getProductById(8)
 
 console.log(handleProducts.getProducts())
+*/
 
 
